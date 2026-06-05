@@ -1,0 +1,113 @@
+#Day 07 — SPEED TYPING
+#Rewrite ALL FOUR from scratch:
+
+#Ansible: Install nginx
+#Terraform: EC2 (choose any Pathnex instance)
+#Kubernetes: Deployment 2 replicas
+#Shell: Print date + uptime
+#Set a timer: 20 minutes
+
+
+- name: speed typing nginx installation
+  host: all
+  become: yes
+  tasks:
+    - name: install nginx
+      yum:
+      name: nginx
+      state: present
+
+#terraform: ec2
+
+resource "aws_instance" "pathnexSpeedEC2" {
+    ami = "ami-0abcd1234abcd1234"
+    instance_type = "t2.micro"
+    tags = {
+      Name = "pathnex-speed-test"  
+    }
+}
+
+#kubernetes: deployment 2 replicas
+
+apiVersion: app/v1
+kind: Deployment
+metadata:
+  name: pathnex-deployment
+spec:
+  replicas: 2
+  selector: 
+    matchLabels:
+    app: web
+  template: 
+    metadata:
+      labels:
+        app: web
+  spec:
+    containers:
+      - name: nginx
+        image: nginx:latest
+        ports: 
+          - containerPort: 80
+
+
+
+#shell script
+
+#!/bin/bash
+echo "current date & time: $(date)"
+echo "system uptime: $(uptime)"
+
+
+
+#Parameterized Builds
+#🔹 Jenkins Pipeline — Parameterized
+#You will learn how to create parameterized builds in Jenkins.
+#pipeline { agent any parameters { string(name: 'ENVIRONMENT',
+# defaultValue: 'dev', description: 'Deployment Environment') }
+#  environment { INSTITUTE_NAME = "Pathnex" } stages { stage('Checkout') { steps { git url: 'https://github.com/Pathnex/sample-java-app.git' } } stage('Deploy') { steps { sh 'echo "Deploying to $ENVIRONMENT by $INSTITUTE_NAME"' } } } }
+
+pipeline {
+    agent any
+    parameters {
+        string(name: 'ENVIRONMENT', defaultValue: 'dev', description: 'Deployment Environment')
+    }
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/Pathnex/sample-java-app.git'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh 'echo "Deploying to $ENVIRONMENT by $INSTITUTE_NAME"'
+            }
+        }
+    }
+}
+
+
+
+#🔹 GitLab CI — Parameterized via Variables
+#You will learn how to use variables to parameterize GitLab jobs.
+#stages:
+#deploy
+#variables: INSTITUTE_NAME: "Pathnex" ENVIRONMENT: "dev"
+#deploy: stage: deploy image: alpine:latest script: - echo
+#"Deploying to $ENVIRONMENT by $INSTITUTE_NAME"
+
+
+stages:
+  - deploy
+
+variables:
+  INSTITUTE_NAME: "Pathnex"
+  ENVIRONMENT: "dev"
+
+deploy:
+  stage: deploy
+  image: alpine:latest
+  script:
+    - echo "Deploying to $ENVIRONMENT by $INSTITUTE_NAME"
